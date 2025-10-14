@@ -1,0 +1,93 @@
+﻿@using HoangThach.AccountShared.Models.Entities
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+@if (IsDebug)
+{
+    <MudNavMenu>
+
+
+        @if (render)
+        {
+            <MudNavLink Href="https://devaccount.hoangthach.vn" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Person">Cá nhân</MudNavLink>
+            <MudNavLink Href="Title" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Insights">Chức danh</MudNavLink>
+
+            <MudNavLink Href="Organization" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.GroupWork">Tổ chức</MudNavLink>
+            <MudNavLink Href="OrganizationTitle" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.DatasetLinked">Tổ chức - Chức danh</MudNavLink>
+            <MudNavLink Href="OrganizationTitlePerson" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.DataThresholding">Cá nhân - Tổ chức - Chức danh</MudNavLink>
+
+        }
+
+    </MudNavMenu>
+}
+else
+{
+    <MudNavMenu>
+
+
+        @if (render)
+        {
+            <MudNavLink Href="https://account.hoangthach.vn" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+
+
+            <AuthorizeView Roles="ORG.Admin">
+                <Authorized>
+
+
+                    <MudNavLink Href="/" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Person">Cá nhân</MudNavLink>
+                    <MudNavLink Href="Title" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.Insights">Chức danh</MudNavLink>
+
+                    <MudNavLink Href="Organization" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.GroupWork">Tổ chức</MudNavLink>
+                    <MudNavLink Href="OrganizationTitle" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.DatasetLinked">Tổ chức, Chức danh</MudNavLink>
+                    <MudNavLink Href="OrganizationTitlePerson" Match="NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.DataThresholding">Cá nhân, Tổ chức, Chức danh</MudNavLink>
+
+                </Authorized>
+            </AuthorizeView>
+
+        }
+
+    </MudNavMenu>
+}
+
+@code {
+
+    private bool IsDebug { get; set; }
+    bool render = false;
+    public string UserId = "";
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            render = true;
+
+
+            var authState = await AuthenticationState;
+            var user = authState.User;
+
+            if (user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+
+                var claims = user.Claims;
+
+                UserId = user!.Claims.First().Value;
+            }
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+#if DEBUG
+    IsDebug = true;
+#else
+        IsDebug = false;
+#endif
+    }
+
+}

@@ -1,0 +1,63 @@
+﻿@page "/Home"
+@using HoangThach.AccountShared.Services;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims;
+
+
+
+@if (isAuthenticated)
+{
+    <div>Bạn đã đăng nhập</div>
+}
+else
+{
+    <div>Đang kiểm tra đăng nhập</div>
+}
+
+
+@code {
+    [Inject] private IAuthService AuthService { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    [Inject] private AuthenticationService authenticationService { get; set; }
+
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    private bool isAuthenticated = false;
+
+    public string? UserId = "";
+    public string? Gid = "";
+    private string? authMessage;
+    private string? UserName;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
+            if (!string.IsNullOrEmpty(token))
+            {
+                await authenticationService.MarkUserAsAuthenticated(token, null);
+                var authState = await authenticationState;
+                var user = authState.User;
+
+                if (user.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
+                {
+                    isAuthenticated = true;
+                    UserId = user!.Claims.First().Value;
+                    Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+                    UserName = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+                    StateHasChanged();
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/Logout");
+                }
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/Logout");
+
+            }
+            StateHasChanged();
+        }
+    }
+}
