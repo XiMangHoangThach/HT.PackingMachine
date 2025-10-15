@@ -1,13 +1,24 @@
 using Blazored.LocalStorage;
+using HoangThach.AccountShared.Data;
 using HoangThach.AccountShared.Services;
 using HT.PackingMachine.Components;
+using HT.PackingMachine.Data;
+using HT.PackingMachine.Data.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+
+builder.Services.AddDbContext<XhsContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("XhsDbContext") ?? ""));
+builder.Services.AddScoped<XhsSpServices>();
+
+var sp = builder.Services.BuildServiceProvider();
+var scope = sp.CreateScope();
+var authDB = scope.ServiceProvider.GetRequiredService<XhsContext>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -23,6 +34,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpClient();
 #endregion
 
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<XhsSpServices>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
