@@ -34,8 +34,11 @@ namespace HT.PackingMachine.Components.Pages
         public string ShowCreate = "d-flex";
         public bool DisabledSoLo = false;
 
-        [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+        [CascadingParameter]
+        private Task<AuthenticationState>? authenticationState { get; set; }
+
         public int UserId = 0;
+        public string? Gid = "";
         protected override async Task OnInitializedAsync()
         {
 
@@ -57,21 +60,26 @@ namespace HT.PackingMachine.Components.Pages
         }
         private async Task HandleToken()
         {
-            // kiểm tra refreshToken đang có, tồn tại hay ko?
-            var refreshToken = await JSRuntime.InvokeAsync<string>("getCookie", "refreshToken");
-            if (!string.IsNullOrEmpty(refreshToken))
+            var token = await AuthService.CheckTokenAndRefresh(null);
+
+            if (authenticationState is not null)
             {
-                var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
-                if (string.IsNullOrEmpty(token))
+                var authState = await authenticationState;
+                var user = authState?.User;
+
+                if (user?.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
                 {
-                    // là null quay lại đăng nhập
-                    NavigationManager.NavigateTo("/Logout");
+                    UserId = int.Parse(user.Claims.First().Value);
+                    Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("Login");
                 }
             }
             else
             {
-                // nếu ko tồn tại quay lại đăng nhập
-                NavigationManager.NavigateTo("/Logout");
+                NavigationManager.NavigateTo("Login");
             }
         }
         private async Task Reload(string message, Severity severity)

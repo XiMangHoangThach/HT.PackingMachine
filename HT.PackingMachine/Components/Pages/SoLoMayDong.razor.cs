@@ -31,10 +31,12 @@ namespace HT.PackingMachine.Components.Pages
         public string ShowEdit = "d-none";
         public string ShowDelete = "d-none";
         public string ShowCreate = "d-flex";
+        [CascadingParameter]
+        private Task<AuthenticationState>? authenticationState { get; set; }
 
-
-        [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
         public int UserId = 0;
+        public string? Gid = "";
+
         protected override async Task OnInitializedAsync()
         {
 
@@ -57,21 +59,26 @@ namespace HT.PackingMachine.Components.Pages
         }
         private async Task HandleToken()
         {
-            // kiểm tra refreshToken đang có, tồn tại hay ko?
-            var refreshToken = await JSRuntime.InvokeAsync<string>("getCookie", "refreshToken");
-            if (!string.IsNullOrEmpty(refreshToken))
+            var token = await AuthService.CheckTokenAndRefresh(null);
+
+            if (authenticationState is not null)
             {
-                var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
-                if (string.IsNullOrEmpty(token))
+                var authState = await authenticationState;
+                var user = authState?.User;
+
+                if (user?.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
                 {
-                    // là null quay lại đăng nhập
-                    NavigationManager.NavigateTo("/Logout");
+                    UserId = int.Parse(user.Claims.First().Value);
+                    Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("Login");
                 }
             }
             else
             {
-                // nếu ko tồn tại quay lại đăng nhập
-                NavigationManager.NavigateTo("/Logout");
+                NavigationManager.NavigateTo("Login");
             }
         }
         private async Task Reload(string message, Severity severity)
@@ -357,7 +364,9 @@ namespace HT.PackingMachine.Components.Pages
         private async Task<List<BatchNum_Register>> GetBatchNumRegisterAsync()
         {
             BatchNumRegisters = new();
-            var data = await XhsContext!.BatchNum_Registers.Include(p => p.BatchNum_List).Include(p => p.PackingMachine)
+            var data = await XhsContext!.BatchNum_Registers
+                .Include(p => p.BatchNum_List)
+                .Include(p => p.PackingMachine)
                 .Where(a => a.Status == (byte)HTStatusCodeEnum.Stable)
                 .Where(p => p.PackingMachine.PackingType == (int)HTPackingTypeEnum.BAO)
                 .OrderByDescending(c => c.Id).AsNoTracking().ToListAsync();

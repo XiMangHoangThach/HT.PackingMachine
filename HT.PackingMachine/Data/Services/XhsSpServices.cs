@@ -188,7 +188,7 @@ namespace HT.PackingMachine.Data.Services
                     var pars = new DynamicParameters();
                     pars.AddDynamicParams(new
                     {
-                        BatchNumList_Id = BatchNumRegister.BatchNum_List_Id,
+                        BatchNum_List_Id = BatchNumRegister.BatchNum_List_Id,
                         PackingMachineId = BatchNumRegister.PackingMachine_Id,
                         Qty = BatchNumRegister.Qty,
                         CreatedBy = BatchNumRegister.CreatedBy,
@@ -247,7 +247,7 @@ namespace HT.PackingMachine.Data.Services
                     pars.AddDynamicParams(new
                     {
                         ID = BatchNumRegister.Id,
-                        BatchNumList_Id = BatchNumRegister.BatchNum_List_Id,
+                        BatchNum_List_Id = BatchNumRegister.BatchNum_List_Id,
                         PackingMachineId = BatchNumRegister.PackingMachine_Id,
                         Qty = BatchNumRegister.Qty,
                         ModifiedBy = BatchNumRegister.ModifiedBy,
