@@ -98,14 +98,30 @@
         if (firstRender)
         {
             await Task.Delay(500);
-            //var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
-            string token = await _localStorage.GetItemAsync<string>("authToken");
+
+            var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
+          
             if (!string.IsNullOrEmpty(token))
             {
-                await authenticationService.MarkUserAsAuthenticated(token, null);
-                var authState = await AuthenticationState;
-                var user = authState.User;
-                UserName = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+                if (AuthenticationState is not null)
+                {
+                    var authState = await AuthenticationState;
+                    var user = authState?.User;
+
+                    if (user?.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
+                    {
+                        UserName = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+                    }
+                    else
+                    {
+                        NavigationManager.NavigateTo("Login");
+                    }
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("Login");
+                }
+              
             }
 
 
