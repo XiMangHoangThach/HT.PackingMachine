@@ -99,7 +99,7 @@
         {
             await Task.Delay(500);
 
-            var token = await AuthService.CheckTokenAndRefresh(NavigationManager.BaseUri);
+            var token = await AuthService.CheckTokenAndRefresh(null);
           
             if (!string.IsNullOrEmpty(token))
             {

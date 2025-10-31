@@ -43,6 +43,7 @@ namespace HT.PackingMachine.Components.Pages
 
         public string? Gid = "";
         public int UserId = 0;
+        public bool IsAuthen { get; set; } = false;
         protected override async Task OnInitializedAsync()
         {
 
@@ -54,40 +55,39 @@ namespace HT.PackingMachine.Components.Pages
         {
             if (firstRender)
             {
-             
-                await HandleToken();
+                await Task.Delay(500);
+                var token = await AuthService.CheckTokenAndRefresh(null);
 
-                await GetCategoriesAsync();
-                await GetBatchNumListAsync();
+                if (authenticationState is not null)
+                {
+                    var authState = await authenticationState;
+                    var user = authState?.User;
 
+                    if (user?.Identity is not null && user.Identity.IsAuthenticated)
+                    {
+                        IsAuthen = true;
+                        UserId = int.Parse(user.Claims.First().Value);
+                        Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+
+                        await GetCategoriesAsync();
+                        await GetBatchNumListAsync();
+
+                    }
+                    else
+                    {
+                        NavigationManager.NavigateTo("login");
+                    }
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("login");
+                }
+            
          
                 StateHasChanged();
             }
         }
-        private async Task HandleToken()
-        {
-            var token = await AuthService.CheckTokenAndRefresh(null);
-
-            if (authenticationState is not null)
-            {
-                var authState = await authenticationState;
-                var user = authState?.User;
-
-                if (user?.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
-                {
-                    UserId = int.Parse(user.Claims.First().Value);
-                    Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
-                }
-                else
-                {
-                    NavigationManager.NavigateTo("Login");
-                }
-            }
-            else
-            {
-                NavigationManager.NavigateTo("Login");
-            }
-        }
+      
         private async Task Reload(string message, Severity severity)
         {
             await Task.Delay(300);

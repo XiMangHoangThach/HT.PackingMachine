@@ -36,7 +36,7 @@ namespace HT.PackingMachine.Components.Pages
 
         public int UserId = 0;
         public string? Gid = "";
-
+        public bool IsAuthen = false;
         protected override async Task OnInitializedAsync()
         {
 
@@ -48,39 +48,39 @@ namespace HT.PackingMachine.Components.Pages
         {
             if (firstRender)
             {
-              
-                await HandleToken();
-                await GetBatchNumListAsync();
-                await GetPackingMachineAsync();
-                await GetBatchNumRegisterAsync();
-            
-                StateHasChanged();
-            }
-        }
-        private async Task HandleToken()
-        {
-            var token = await AuthService.CheckTokenAndRefresh(null);
+                await Task.Delay(500);
+                var token = await AuthService.CheckTokenAndRefresh(null);
 
-            if (authenticationState is not null)
-            {
-                var authState = await authenticationState;
-                var user = authState?.User;
-
-                if (user?.Identity is not null && user.Identity.IsAuthenticated && !string.IsNullOrEmpty(token))
+                if (authenticationState is not null)
                 {
-                    UserId = int.Parse(user.Claims.First().Value);
-                    Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+                    var authState = await authenticationState;
+                    var user = authState?.User;
+
+                    if (user?.Identity is not null && user.Identity.IsAuthenticated)
+                    {
+                        IsAuthen = true;
+                        UserId = int.Parse(user.Claims.First().Value);
+                        Gid = user.FindFirst(c => c.Type == "Gid")?.Value;
+
+                        await GetBatchNumListAsync();
+                        await GetPackingMachineAsync();
+                        await GetBatchNumRegisterAsync();
+
+                    }
+                    else
+                    {
+                        NavigationManager.NavigateTo("login");
+                    }
                 }
                 else
                 {
-                    NavigationManager.NavigateTo("Login");
+                    NavigationManager.NavigateTo("login");
                 }
-            }
-            else
-            {
-                NavigationManager.NavigateTo("Login");
+           
+                StateHasChanged();
             }
         }
+    
         private async Task Reload(string message, Severity severity)
         {
             await Task.Delay(300);

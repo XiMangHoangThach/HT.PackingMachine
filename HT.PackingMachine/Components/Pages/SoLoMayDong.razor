@@ -10,100 +10,103 @@
 <PageTitle>Số lô cho máy đóng</PageTitle>
 
 
+@if (IsAuthen)
+{
+    <MudStack>
+        <EditForm Model="@Input" Context="ct" OnValidSubmit="OnValidSubmit" onkeydown="return event.key != 'Enter'">
+            <DataAnnotationsValidator />
+            <MudCard Elevation="4">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h4" Class="pt-3" Align="Align.Left">
+                        Số lô cho máy đóng
+                    </MudText>
 
-<MudStack>
-    <EditForm Model="@Input" Context="ct" OnValidSubmit="OnValidSubmit" onkeydown="return event.key != 'Enter'">
-        <DataAnnotationsValidator />
-        <MudCard Elevation="4">
-            <MudCardHeader>
-                <MudText Typo="Typo.h4" Class="pt-3" Align="Align.Left">
-                    Số lô cho máy đóng
-                </MudText>
+                </MudCardHeader>
+                <MudDivider DividerType="DividerType.Middle" Class="my-1" />
+                <MudCardContent>
 
-            </MudCardHeader>
-            <MudDivider DividerType="DividerType.Middle" Class="my-1" />
-            <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" sm="4" md="3">
+                            <MudSelect @bind-Value="_batchNumListId" ErrorId="0" RequiredError="Bạn chưa chọn số lô" Required="true" AnchorOrigin="Origin.BottomCenter" Label="Số lô" HelperText="Danh sách" Placeholder="Lựa chọn" AdornmentIcon="@Icons.Material.Filled.Api" AdornmentColor="Color.Primary">
+                                <MudSelectItem T="int" Value="0">-- Chọn số lô --</MudSelectItem>
+                                @foreach (var item in BatchNumLists)
+                                {
+                                    <MudSelectItem T="int" Value="@item.Id">@item.BatchNum - @item.Category.Name - @item.Qty</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
 
-                <MudGrid>
-                    <MudItem xs="12" sm="4" md="3">
-                        <MudSelect @bind-Value="_batchNumListId" ErrorId="0" RequiredError="Bạn chưa chọn số lô" Required="true" AnchorOrigin="Origin.BottomCenter" Label="Số lô" HelperText="Danh sách" Placeholder="Lựa chọn" AdornmentIcon="@Icons.Material.Filled.Api" AdornmentColor="Color.Primary">
-                            <MudSelectItem T="int" Value="0">-- Chọn số lô --</MudSelectItem>
-                            @foreach (var item in BatchNumLists)
-                            {
-                                <MudSelectItem T="int" Value="@item.Id">@item.BatchNum - @item.Category.Name - @item.Qty</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
+                        <MudItem xs="12" sm="4" md="3">
+                            <MudSelect @bind-Value="Input.PackingMachine_Id" ErrorId="0" RequiredError="Bạn chưa chọn máy đóng" Required="true" AnchorOrigin="Origin.BottomCenter" Label="Máy đóng" HelperText="Danh sách" Placeholder="Lựa chọn" AdornmentIcon="@Icons.Material.Filled.Api" AdornmentColor="Color.Primary">
+                                <MudSelectItem T="int?" Value="0">-- Chọn máy đóng --</MudSelectItem>
+                                @foreach (var item in PackingMachines)
+                                {
+                                    <MudSelectItem T="int?" Value="@item.Id">@item.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4" md="3">
+                            <MudNumericField @bind-Value="Input.Qty" Immediate="true" For="@(() => Input.Qty)" RequiredError="Phải nhập só lượng" Required="true" HelperText="Number" Label="Số lượng" Variant="Variant.Text" />
+                        </MudItem>
 
-                    <MudItem xs="12" sm="4" md="3">
-                        <MudSelect @bind-Value="Input.PackingMachine_Id" ErrorId="0" RequiredError="Bạn chưa chọn máy đóng" Required="true" AnchorOrigin="Origin.BottomCenter" Label="Máy đóng" HelperText="Danh sách" Placeholder="Lựa chọn" AdornmentIcon="@Icons.Material.Filled.Api" AdornmentColor="Color.Primary">
-                            <MudSelectItem T="int?" Value="0">-- Chọn máy đóng --</MudSelectItem>
-                            @foreach (var item in PackingMachines)
-                            {
-                                <MudSelectItem T="int?" Value="@item.Id">@item.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" sm="4" md="3">
-                        <MudNumericField @bind-Value="Input.Qty" Immediate="true" For="@(() => Input.Qty)" RequiredError="Phải nhập só lượng" Required="true" HelperText="Number" Label="Số lượng" Variant="Variant.Text" />
-                    </MudItem>
+                    </MudGrid>
 
-                </MudGrid>
+                </MudCardContent>
+                <MudDivider DividerType="DividerType.Middle" Class="my-1" />
 
-            </MudCardContent>
-            <MudDivider DividerType="DividerType.Middle" Class="my-1" />
+                <MudCardActions Class="d-flex justify-end flex-grow-1 gap-4">
+                    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Tertiary" Class="@ShowEdit" OnClick="Back" Variant="Variant.Filled">Back</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Update" Color="Color.Info" Class="@ShowEdit" OnClick="Update" Variant="Variant.Filled">Lưu</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Warning" Class="@ShowDelete" OnClick="Delete" Variant="Variant.Filled">Hủy</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="@ShowCreate" ButtonType="ButtonType.Submit" Variant="Variant.Filled">Thêm</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+        <MudTable class="mud-data-grid" Elevation="4" Bordered="false" Height="400px" FixedHeader="true" Breakpoint="Breakpoint.Sm" SortLabel="Lọc theo"
+                  Dense="true" Hover="true" Striped="false" HorizontalScrollbar="true" FooterClass="table-foot-bordered" CustomFooter="true"
+                  Items="@BatchNumRegisters" Context="ctUser" @bind-SelectedItem="Input" Filter="new Func<BatchNum_Register,bool>(FilterFunc)" OnRowClick="RowClickEvent"
+                  Loading="@ShowProgress" LoadingProgressColor="Color.Info" T="BatchNum_Register">
+            <ToolBarContent>
+                <MudText Typo="Typo.h4" Class="pt-3" Align="Align.Left">Danh sách Số lô cho máy đóng</MudText>
 
-            <MudCardActions Class="d-flex justify-end flex-grow-1 gap-4">
-                <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Tertiary" Class="@ShowEdit" OnClick="Back" Variant="Variant.Filled">Back</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Update" Color="Color.Info" Class="@ShowEdit" OnClick="Update" Variant="Variant.Filled">Lưu</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Warning" Class="@ShowDelete" OnClick="Delete" Variant="Variant.Filled">Hủy</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="@ShowCreate" ButtonType="ButtonType.Submit" Variant="Variant.Filled">Thêm</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </EditForm>
-    <MudTable class="mud-data-grid" Elevation="4" Bordered="false" Height="400px" FixedHeader="true" Breakpoint="Breakpoint.Sm" SortLabel="Lọc theo"
-              Dense="true" Hover="true" Striped="false" HorizontalScrollbar="true" FooterClass="table-foot-bordered" CustomFooter="true"
-              Items="@BatchNumRegisters" Context="ctUser" @bind-SelectedItem="Input" Filter="new Func<BatchNum_Register,bool>(FilterFunc)" OnRowClick="RowClickEvent"
-              Loading="@ShowProgress" LoadingProgressColor="Color.Info" T="BatchNum_Register">
-        <ToolBarContent>
-            <MudText Typo="Typo.h4" Class="pt-3" Align="Align.Left">Danh sách Số lô cho máy đóng</MudText>
-
-            <MudSpacer></MudSpacer>
-            <MudTextField @bind-Value="searchString" Immediate="true" Placeholder="Tìm kiếm Số lô cho máy đóng" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="@Color.Primary" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudSpacer></MudSpacer>
+                <MudTextField @bind-Value="searchString" Immediate="true" Placeholder="Tìm kiếm Số lô cho máy đóng" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="@Color.Primary" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 
 
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh>
-                #
-            </MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<BatchNum_Register, object>(x => x.BatchNum_List!.BatchNum)">Số lô</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<BatchNum_Register, object>(x => x.PackingMachine!.Name)">Máy đóng</MudTableSortLabel></MudTh>
-            <MudTh>Số lượng</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            @{
-                var rn = 0;
-                for (int i = 0; i < BatchNumRegisters.Count(); i++)
-                {
-                    rn = BatchNumRegisters.IndexOf(ctUser) + 1;
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>
+                    #
+                </MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<BatchNum_Register, object>(x => x.BatchNum_List!.BatchNum)">Số lô</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<BatchNum_Register, object>(x => x.PackingMachine!.Name)">Máy đóng</MudTableSortLabel></MudTh>
+                <MudTh>Số lượng</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                @{
+                    var rn = 0;
+                    for (int i = 0; i < BatchNumRegisters.Count(); i++)
+                    {
+                        rn = BatchNumRegisters.IndexOf(ctUser) + 1;
+                    }
                 }
-            }
-            <MudTd DataLabel="#">@rn</MudTd>
-            <MudTd DataLabel="BatchNum">@ctUser.BatchNum_List!.BatchNum</MudTd>
-            <MudTd DataLabel="Name">@ctUser.PackingMachine!.Name</MudTd>
-            <MudTd>@ctUser.Qty</MudTd>
-            <MudTd DataLabel="Chọn">
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@(() => SelectBatchNumRegister(ctUser.Id))" />
-            </MudTd>
-        </RowTemplate>
+                <MudTd DataLabel="#">@rn</MudTd>
+                <MudTd DataLabel="BatchNum">@ctUser.BatchNum_List!.BatchNum</MudTd>
+                <MudTd DataLabel="Name">@ctUser.PackingMachine!.Name</MudTd>
+                <MudTd>@ctUser.Qty</MudTd>
+                <MudTd DataLabel="Chọn">
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@(() => SelectBatchNumRegister(ctUser.Id))" />
+                </MudTd>
+            </RowTemplate>
 
-        <PagerContent>
+            <PagerContent>
 
-            <MudTablePager />
-        </PagerContent>
+                <MudTablePager />
+            </PagerContent>
 
-    </MudTable>
-</MudStack>
+        </MudTable>
+    </MudStack>
+}
+
 
